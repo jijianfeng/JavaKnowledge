@@ -1,4 +1,4 @@
-package com.jjf.test;
+package com.jjf.collection;
 
 import com.jjf.resource.HashMap;
 import java.util.Collections;
@@ -17,8 +17,7 @@ import java.util.Map;
 public class HashMapTest {
 	public static void main(String args[]){
 		HashMap<String, String> hashMap = new HashMap<String, String>();
-		hashMap.put("hash", "123");
-		HashMap map = (HashMap)hashMap.clone();
+//		HashMap map = (HashMap)hashMap.clone();
 //		Map<String, String> hashMap = Collections.synchronizedMap(hashMap);//new HashMap<String, String>();
 		while(true){
 //			Map<String, String> map = new HashMap<String, String>();

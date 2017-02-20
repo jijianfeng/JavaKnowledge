@@ -1,4 +1,4 @@
-package com.jjf.test;
+package com.jjf.collection;
 
 import java.util.HashMap;
 import java.util.Map;
