@@ -38,7 +38,8 @@ public class HttpClientRequestHandler {
     public static void main(String args[]) throws Exception{
     	String prixyIp = "112.227.50.183";
     	Integer proxyPort = 9999;
-    	String html =  doGet("http://www.baidu.com/s?wd=ip",prixyIp,proxyPort).html();
+    	HttpClient client = HttpConnectionManager.getHttpClient();
+    	String html =  doGet(client,"http://www.baidu.com/s?wd=ip","UTF-8").html();
 //    	writeString(html,"C:/result.txt");
     }
 	
@@ -46,9 +47,9 @@ public class HttpClientRequestHandler {
     /** 
      * get方式提交数据 
      */  
-    public static Document doGet(String url, String proxyIp, Integer proxyPort) throws Exception{  
+    public static Document doGet(HttpClient client,String url,String encoding) throws Exception{  
         //System.out.println("doGet中使用代理："+proxyIp+":"+proxyPort);  
-        HttpClient client = HttpConnectionManager.getHttpClient();//getHttpClientWithProxy(proxyIp,proxyPort);  
+//        HttpClient client = HttpConnectionManager.getHttpClient();//getHttpClientWithProxy(proxyIp,proxyPort);  
         HttpGet httpGet = new HttpGet(url);  
         httpGet.setHeader("Accept-Language", "zh-cn,zh;q=0.5");  
         httpGet.setHeader("Accept-Charset", "GB2312,utf-8;q=0.7,*;q=0.7");  
@@ -61,7 +62,7 @@ public class HttpClientRequestHandler {
             HttpResponse response = client.execute(httpGet);  
             int statuCode = response.getStatusLine().getStatusCode();  
             if(statuCode == 200){  
-                String html = formatResponse(response);  
+                String html = formatResponse(response,encoding);  
                   
                 if(html != null){  
                     return Jsoup.parse(html);  
@@ -85,9 +86,9 @@ public class HttpClientRequestHandler {
      * post方式提交  
      * @throws DataTaskException   
      */  
-    public static Document doPost(String url, Map<String,String> paramaters, String proxyIp, Integer proxyPort) throws Exception{  
+    public static Document doPost(HttpClient client,String url, Map<String,String> paramaters,String encoding) throws Exception{  
           
-        HttpClient client = HttpConnectionManager.getHttpClient();  
+//        HttpClient client = HttpConnectionManager.getHttpClient();  
           
         HttpPost request = new HttpPost(url);  
           
@@ -114,7 +115,7 @@ public class HttpClientRequestHandler {
             int statuCode = response.getStatusLine().getStatusCode();  
               
             if (statuCode == 200) {  
-                String html = formatResponse(response);  
+                String html = formatResponse(response,encoding);  
                   
                 if(html != null){  
                     return Jsoup.parse(html);  
@@ -141,14 +142,14 @@ public class HttpClientRequestHandler {
      * 格式化请求结果  
      * @throws DataTaskException   
      */  
-    private static String formatResponse(HttpResponse response) throws Exception {  
+    private static String formatResponse(HttpResponse response,String encoding) throws Exception {  
           
         ByteArrayInputStream bis = null;  
         try{  
             Header contentEncoding = response.getFirstHeader("Content-Encoding");  
               
             if(contentEncoding == null){  
-                return EntityUtils.toString(response.getEntity(),"UTF-8");  
+                return EntityUtils.toString(response.getEntity(),encoding);  
             } else {  
                   
                 String charset = "utf-8";  

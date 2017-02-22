@@ -7,20 +7,20 @@ package com.jjf.string;
  * Edit:2017年2月20日23:10:15
  */
 public class StringSynchronizedTest {
+	static String string = "String" ;
 	public static void main(String args[]){
 		//TODO-1.String是线程安全的(String是final类了，但是如何写个例子证明线程安全呢？？？下面的方法刚写的，写完想想是错的) 我对于引用的概念还是有点模糊
-//		String string = "String" ;
-//		for(int i = 0;i<100000;i++){
-//			Thread thread = new Thread( new StringThread(string));
-//			thread.start();
-//		}
-		
-		//2TODO  StringBuilder是线程不安全，但是我只想看结果怎么办，用future
-		StringBuilder stringBuilder = new StringBuilder();
-		for(int i = 0;i<100000;i++){
-			Thread thread = new Thread( new StringBuilderThread(stringBuilder));
+		for(int i = 0;i<10;i++){
+			Thread thread = new Thread( new StringThread(string));
 			thread.start();
 		}
+		
+		//2TODO  StringBuilder是线程不安全，但是我只想看结果怎么办，用future
+//		StringBuilder stringBuilder = new StringBuilder();
+//		for(int i = 0;i<100000;i++){
+//			Thread thread = new Thread( new StringBuilderThread(stringBuilder));
+//			thread.start();
+//		}
 		
 		//3.StringBuffer线程不安全
 //		StringBuffer stringBuffer = new StringBuffer();
@@ -28,6 +28,14 @@ public class StringSynchronizedTest {
 //			Thread thread = new Thread( new StringBufferThread(stringBuffer));
 //			thread.start();
 //		}
+	}
+	
+	public synchronized static void append(){
+		string = string+"String";
+	}
+	
+	public synchronized static String get(){
+		return string;
 	}
 }
 
@@ -40,8 +48,9 @@ class StringThread implements Runnable{
 	
 	@Override
 	public void run() {
-		str.replace("String", "Stringstring");
-		System.out.println(str.length()/(new String("String")).length());//结果为100000则是安全的
+		StringSynchronizedTest.append();
+//		System.out.println(StringSynchronizedTest.get());
+		System.out.println(StringSynchronizedTest.get().length()/(new String("String")).length());//结果为100000则是安全的
 	}
 }
 
