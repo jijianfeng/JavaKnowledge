@@ -30,6 +30,7 @@ public class ClassLoaderTest {
         };
 
         // 使用ClassLoaderTest的类加载器加载本类
+//        System.out.println("----"+ClassLoaderTest.class.getClassLoader().getSystemClassLoader().toString());
         Object obj1 = ClassLoaderTest.class.getClassLoader().loadClass("com.jjf.load.ClassLoaderTest").newInstance();
         System.out.println(obj1.getClass());
         System.out.println(obj1 instanceof com.jjf.load.ClassLoaderTest);

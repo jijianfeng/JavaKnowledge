@@ -1,7 +1,7 @@
 package com.jjf.collection;
 
 //import com.jjf.resource.HashMap;
-import java.util.Collections;
+import java.util.SortedMap;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Hashtable;
@@ -20,10 +20,12 @@ public class HashMapTest {
 	public static void main(String args[]){
 		LinkedHashMap<String, String> hashMap = new LinkedHashMap<String, String>();
 //		Map<String, String> hashMap = Collections.synchronizedMap(new HashMap<String, String>());//new HashMap<String, String>();
-		while(true){
+		int i=1;
+		while(i<10000){
 //			Map<String, String> map = new HashMap<String, String>();
 //			hashMap.put("hash", "ÈýÐÇ");
 			new putOne(hashMap).start();;
+			i++;
 		}
 	}
 }
