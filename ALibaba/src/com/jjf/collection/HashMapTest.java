@@ -1,7 +1,7 @@
 package com.jjf.collection;
 
 //import com.jjf.resource.HashMap;
-import java.util.Collections;
+import java.util.SortedMap;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Hashtable;
