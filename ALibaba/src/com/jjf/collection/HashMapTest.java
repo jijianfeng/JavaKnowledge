@@ -1,13 +1,15 @@
 package com.jjf.collection;
 
-import com.jjf.resource.HashMap;
+//import com.jjf.resource.HashMap;
 import java.util.Collections;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Hashtable;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Hashtable;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 2017年2月17日18:30:22
@@ -16,12 +18,11 @@ import java.util.Map;
  */
 public class HashMapTest {
 	public static void main(String args[]){
-		HashMap<String, String> hashMap = new HashMap<String, String>();
-//		HashMap map = (HashMap)hashMap.clone();
-//		Map<String, String> hashMap = Collections.synchronizedMap(hashMap);//new HashMap<String, String>();
+		LinkedHashMap<String, String> hashMap = new LinkedHashMap<String, String>();
+//		Map<String, String> hashMap = Collections.synchronizedMap(new HashMap<String, String>());//new HashMap<String, String>();
 		while(true){
 //			Map<String, String> map = new HashMap<String, String>();
-			hashMap.put("hash", "三星");
+//			hashMap.put("hash", "三星");
 			new putOne(hashMap).start();;
 		}
 	}
@@ -36,8 +37,9 @@ class putOne extends Thread{
 	public void run(){
 		Long time = System.currentTimeMillis();
 		map.put(String.valueOf(time), "1");
+		map.put("hash", "三星");
 		String ss = map.get("hash");
-		if(ss==null){
+		if(!ss.equals("三星")){
 			System.out.println("不安全的HashMap:"+time);
 		}
 	}
