@@ -17,8 +17,9 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  */
 public class HashMapTest {
+	
 	public static void main(String args[]){
-		LinkedHashMap<String, String> hashMap = new LinkedHashMap<String, String>();
+		LinkedHashMap hashMap = new LinkedHashMap<String, String>();
 //		Map<String, String> hashMap = Collections.synchronizedMap(new HashMap<String, String>());//new HashMap<String, String>();
 		int i=1;
 		while(i<10000){

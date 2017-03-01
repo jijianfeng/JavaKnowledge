@@ -27,7 +27,7 @@ public class QuickSort {
 		if (begin < end) // 序列有效
 		{
 			int i = begin, j = end;
-			System.out.println(i+":"+j);
+//			System.out.println(i+":"+j);
 			int vot = table[i]; // 第一个值作为基准值
 			while (i != j) // 一趟排序
 			{

@@ -1,29 +1,41 @@
 package com.jjf.test;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
 /**
- * java基础
+ * 模拟Ca多线程下的解密方式
  * 
  * @author jjf_lenovo
  * 
  */
 public class Test{
-
-	private void test() {
-		System.out.println(super.getClass().getName());
-	}
-
-	public static void main(String[] args) {
-//		 ((Test)null).test();
-		Map map = new HashMap();
-		System.out.println(map.getClass()
-								.getClassLoader()
-										.getSystemClassLoader()
-											.getParent()
-												.toString());
-		System.out.println(System.getProperty("java.class.path"));
+	public static void main(String[] args) throws InstantiationException, IllegalAccessException, ClassNotFoundException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
+		for(int i=1;i<10;i++){
+			Thread thread = new Thread(new Decode());
+			thread.start();
+		}
+		Constructor con = Ca.class.getDeclaredConstructor();
+		con.setAccessible(true);
+		Ca ca = (Ca)con.newInstance();
+		ca.doSomething();
+		
+		ArrayList<Integer> list = new ArrayList<Integer>();
+        Method method = list.getClass().getMethod("add", Object.class);
+        method.invoke(list, "Java反射机制实例。");
+        System.out.println(list.get(0));
 	}	
 }
+
+class Decode implements Runnable{
+	public void run(){
+		Ca ca = Ca.getCa();
+		ca.doSomething();
+	}
+}
+
