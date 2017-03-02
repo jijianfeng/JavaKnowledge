@@ -39,7 +39,7 @@ class Student implements Cloneable {
         } catch (CloneNotSupportedException e) {
             System.out.println(e.toString());
         }
-        o.p = (Professor) p.clone();
+//        o.p = (Professor) p.clone();
         return o;
     }
 }
@@ -49,9 +49,10 @@ public class DeepCopy {
         Professor p = new Professor("wangwu", 50);
         Student s1 = new Student("zhangsan", 18, p);
         Student s2 = (Student) s1.clone();
+        s2.name="ddada";
         s2.p.name = "lisi";
         s2.p.age = 30;
-//        System.out.println("name=" + s1.p.name + "," + "age=" + s1.p.age);// 学生1的教授不改变。
+        //深复制了
         System.out.println("学生s1的姓名：" + s1.name + "\n学生s1教授的姓名：" + s1.p.name + "," + "\n学生s1教授的年纪" + s1.p.age);// 学生1的教授
     }
 }

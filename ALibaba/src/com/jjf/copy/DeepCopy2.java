@@ -60,8 +60,8 @@ public class DeepCopy2 {
 		s2.p.name = "lisi";
 		s2.p.age = 30;
 		System.out.println("name=" + s1.p.name + "," + "age=" + s1.p.age); // 学生1的教授不改变。
-		long t2 = System.currentTimeMillis();
-		System.out.println(t2 - t1);
+//		long t2 = System.currentTimeMillis();
+//		System.out.println(t2 - t1);
 	}
 
 }
