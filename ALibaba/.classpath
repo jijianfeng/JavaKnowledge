@@ -8,5 +8,6 @@
 	<classpathentry kind="lib" path="lib/httpcore-4.3.jar"/>
 	<classpathentry kind="lib" path="lib/jsoup-1.7.3.jar"/>
 	<classpathentry kind="lib" path="lib/commons-logging-1.2.jar"/>
+	<classpathentry kind="lib" path="lib/jedis-2.9.0.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
