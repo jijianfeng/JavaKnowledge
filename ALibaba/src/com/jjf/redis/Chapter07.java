@@ -593,11 +593,10 @@ public class Chapter07 {
     }
 
     public long zaddString(Jedis conn, String name, Map<String,String> values) {
-        Map<Double,String> pieces = new HashMap<Double,String>(values.size());
+        Map<String,Double> pieces = new HashMap<String,Double>(values.size());
         for (Map.Entry<String,String> entry : values.entrySet()) {
-            pieces.put((double)stringToScore(entry.getValue()), entry.getKey());
+            pieces.put( entry.getKey(),(double)stringToScore(entry.getValue()));
         }
-
         return conn.zadd(name, pieces);
     }
 

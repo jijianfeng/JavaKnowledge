@@ -1,7 +1,10 @@
 package com.jjf.redis;
+
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
+import org.apache.commons.csv.CSVRecord;
 import org.javatuples.Pair;
 import redis.clients.jedis.*;
 
@@ -443,11 +446,12 @@ public class Chapter05 {
         FileReader reader = null;
         try{
             reader = new FileReader(file);
-            CSVParser parser = new CSVParser(reader);
+            CSVParser parser = new CSVParser(reader,CSVFormat.RFC4180);
             int count = 0;
-            String[] line = null;
-            while ((line = parser.getLine()) != null){
-                String startIp = line.length > 1 ? line[0] : "";
+//            String[] line = null;
+            List<CSVRecord> list = parser.getRecords();
+            for(CSVRecord line :list){
+                String startIp = line.size() > 1 ? line.get(0) : "";
                 if (startIp.toLowerCase().indexOf('i') != -1){
                     continue;
                 }
@@ -462,7 +466,7 @@ public class Chapter05 {
                     }
                 }
 
-                String cityId = line[2] + '_' + count;
+                String cityId = line.get(2) + '_' + count;
                 conn.zadd("ip2cityid:", score, cityId);
                 count++;
             }
@@ -482,16 +486,17 @@ public class Chapter05 {
         FileReader reader = null;
         try{
             reader = new FileReader(file);
-            CSVParser parser = new CSVParser(reader);
-            String[] line = null;
-            while ((line = parser.getLine()) != null){
-                if (line.length < 4 || !Character.isDigit(line[0].charAt(0))){
+                    CSVParser parser = new CSVParser(reader, CSVFormat.RFC4180);
+//            String[] line = null;
+            List<CSVRecord> list = parser.getRecords();
+            for(CSVRecord line :list){
+                if (line.size() < 4 || !Character.isDigit(line.get(0).charAt(0))){
                     continue;
                 }
-                String cityId = line[0];
-                String country = line[1];
-                String region = line[2];
-                String city = line[3];
+                String cityId = line.get(0);
+                String country = line.get(1);
+                String region = line.get(2);
+                String city = line.get(3);
                 String json = gson.toJson(new String[]{city, region, country});
                 conn.hset("cityid2city:", cityId, json);
             }
