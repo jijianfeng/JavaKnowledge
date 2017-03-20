@@ -3,8 +3,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import redis.clients.jedis.Jedis;
+import redis.clients.jedis.ZParams;
 /**
  * 屌丝腾讯云装了个redis
  * @author jjf_lenovo
@@ -16,12 +18,10 @@ public class RedisTest {
     	Jedis jedis = new Jedis("182.254.213.106",6379);
     	jedis.auth("123456");
     	System.out.println("Server is running: "+jedis.ping());
-    	HashMap<String,String> map = new HashMap<String,String>();
-    	map.put("Yahoo", "???");
-    	map.put("360", "336600");
-    	System.out.println(jedis.hset("hello", "Tencent","BOOM!" ));
-    	System.out.println(jedis.hmset("hello", map));
-    	//查看服务是否运行
+    	
+    	ZParams params = new ZParams().aggregate(ZParams.Aggregate.MAX);
+    	jedis.zinterstore("user:female", params, "sex:female", "user:"); //创建名为key的group和order的交集集合
+        jedis.expire("user:female", 60);
     }
 }
 /*1.对value操作的命令

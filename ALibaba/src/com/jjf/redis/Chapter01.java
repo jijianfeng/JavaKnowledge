@@ -20,29 +20,29 @@ public class Chapter01 {
         //选择数据库，默认0
         conn.select(15);
         String articleId = postArticle(
-            conn, "username", "A title", "http://www.google.com");
-        System.out.println("We posted a new article with id: " + articleId);
-        System.out.println("Its HASH looks like:");
-        Map<String,String> articleData = conn.hgetAll("article:" + articleId);
-        for (Map.Entry<String,String> entry : articleData.entrySet()){
-            System.out.println("  " + entry.getKey() + ": " + entry.getValue());
-        }
+            conn, "小明", "A title", "http://www.google.com");
+//        System.out.println("We posted a new article with id: " + articleId);
+//        System.out.println("Its HASH looks like:");
+//        Map<String,String> articleData = conn.hgetAll("article:" + articleId);
+//        for (Map.Entry<String,String> entry : articleData.entrySet()){
+//            System.out.println("  " + entry.getKey() + ": " + entry.getValue());
+//        }
 
-        System.out.println();
+//        System.out.println();
 
-        articleVote(conn, "other_user", "article:" + articleId);
+        articleVote(conn, "小红", "article:" + articleId);
         String votes = conn.hget("article:" + articleId, "votes");
-        System.out.println("We voted for the article, it now has votes: " + votes);
+//        System.out.println("We voted for the article, it now has votes: " + votes);
         assert Integer.parseInt(votes) > 1;
 
-        System.out.println("The currently highest-scoring articles are:");
+//        System.out.println("The currently highest-scoring articles are:");
         List<Map<String,String>> articles = getArticles(conn, 1);
         printArticles(articles);
         assert articles.size() >= 1;
 
-        addGroups(conn, articleId, new String[]{"new-group"});
+        addGroups(conn, articleId, new String[]{"kartoon-group"});
         System.out.println("We added the article to a new group, other articles include:");
-        articles = getGroupArticles(conn, "new-group", 1);
+        articles = getGroupArticles(conn, "kartoon-group", 1);
         printArticles(articles);
         assert articles.size() >= 1;
     }
@@ -59,8 +59,8 @@ public class Chapter01 {
         String articleId = String.valueOf(conn.incr("article:"));  //计数自增并返回自增后count
 
         String voted = "voted:" + articleId;
-        conn.sadd(voted, user);
-        conn.expire(voted, ONE_WEEK_IN_SECONDS);
+        conn.sadd(voted, user);//Set添加
+        conn.expire(voted, ONE_WEEK_IN_SECONDS); //过期删除
 
         long now = System.currentTimeMillis() / 1000;
         String article = "article:" + articleId;
@@ -71,8 +71,9 @@ public class Chapter01 {
         articleData.put("now", String.valueOf(now));
         articleData.put("votes", "1");
         
+        //保存文章，默认自己投自己一票
         conn.hmset(article, articleData);//hmset存map  hset存单个
-        conn.zadd("score:", now + VOTE_SCORE, article);
+        conn.zadd("score:", now + VOTE_SCORE, article);   //在"score:"库里添加value为article的值为now+VOTE_SCORE 允许覆盖
         conn.zadd("time:", now, article);
 
         return articleId;
@@ -92,7 +93,7 @@ public class Chapter01 {
 
         String articleId = article.substring(article.indexOf(':') + 1);
         if (conn.sadd("voted:" + articleId, user) == 1) {
-            conn.zincrby("score:", VOTE_SCORE, article);
+            conn.zincrby("score:", VOTE_SCORE, article); //key -score增量 类似 String APPEND
             conn.hincrBy(article, "votes", 1l);
         }
     }
@@ -118,7 +119,7 @@ public class Chapter01 {
         int start = (page - 1) * ARTICLES_PER_PAGE;
         int end = start + ARTICLES_PER_PAGE - 1;
 
-        Set<String> ids = conn.zrevrange(order, start, end);
+        Set<String> ids = conn.zrevrange(order, start, end); //只获取value的排序后结果
         List<Map<String,String>> articles = new ArrayList<Map<String,String>>();
         for (String id : ids){
             Map<String,String> articleData = conn.hgetAll(id);
@@ -145,7 +146,7 @@ public class Chapter01 {
         String key = order + group;
         if (!conn.exists(key)) {
             ZParams params = new ZParams().aggregate(ZParams.Aggregate.MAX);
-            conn.zinterstore(key, params, "group:" + group, order);
+            conn.zinterstore(key, params, "group:" + group, order); //创建名为key的group和order的交集集合
             conn.expire(key, 60);
         }
         return getArticles(conn, page, key);
