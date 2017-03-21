@@ -8,6 +8,11 @@ import java.net.URL;
 import java.util.*;
 
 public class Chapter02 {
+    //统一配置数据库
+    static final String DATASOURCE_URL = "182.254.213.106";
+    static final int DATASOURCE_SORT = 6379;
+    static final String DATASOURCE_PASS = "123456";
+    static final int DATASOURCE_SELECT = 14;
     public static final void main(String[] args)
         throws InterruptedException
     {
@@ -17,8 +22,9 @@ public class Chapter02 {
     public void run()
         throws InterruptedException
     {
-        Jedis conn = new Jedis("localhost");
-        conn.select(15);
+        Jedis conn = new Jedis(Chapter02.DATASOURCE_URL,Chapter02.DATASOURCE_SORT);
+        conn.auth(Chapter02.DATASOURCE_PASS);
+        conn.select(Chapter02.DATASOURCE_SELECT);
 
         testLoginCookies(conn);
         testShopppingCartCookies(conn);
@@ -264,8 +270,9 @@ public class Chapter02 {
         private boolean quit;
 
         public CleanSessionsThread(int limit) {
-            this.conn = new Jedis("localhost");
-            this.conn.select(15);
+            this.conn = new Jedis(Chapter02.DATASOURCE_URL,Chapter02.DATASOURCE_SORT);
+            this.conn.auth(Chapter02.DATASOURCE_PASS);
+            this.conn.select(Chapter02.DATASOURCE_SELECT);
             this.limit = limit;
         }
 
@@ -309,8 +316,9 @@ public class Chapter02 {
         private boolean quit;
 
         public CleanFullSessionsThread(int limit) {
-            this.conn = new Jedis("localhost");
-            this.conn.select(15);
+            this.conn = new Jedis(Chapter02.DATASOURCE_URL,Chapter02.DATASOURCE_SORT);
+            this.conn.auth(Chapter02.DATASOURCE_PASS);
+            this.conn.select(Chapter02.DATASOURCE_SELECT);
             this.limit = limit;
         }
 
@@ -354,8 +362,9 @@ public class Chapter02 {
         private boolean quit;
 
         public CacheRowsThread() {
-            this.conn = new Jedis("localhost");
-            this.conn.select(15);
+            this.conn = new Jedis(Chapter02.DATASOURCE_URL,Chapter02.DATASOURCE_SORT);
+            this.conn.auth(Chapter02.DATASOURCE_PASS);
+            this.conn.select(Chapter02.DATASOURCE_SELECT);
         }
 
         public void quit() {
