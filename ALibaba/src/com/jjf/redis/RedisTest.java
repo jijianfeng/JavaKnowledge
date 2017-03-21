@@ -1,194 +1,217 @@
 package com.jjf.redis;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
+import org.junit.Assert;
+import org.junit.Test;
 import redis.clients.jedis.Jedis;
-import redis.clients.jedis.ZParams;
+import redis.clients.jedis.ScanResult;
+
+import java.util.List;
+
 /**
  * 屌丝腾讯云装了个redis
  * @author jjf_lenovo
  * 2017年3月12日22:13:47
  */
 public class RedisTest {
-	public static void main( String[] args )
+    Jedis jedis = null;
+    public RedisTest(){
+        //基本配置
+        jedis = new Jedis("182.254.213.106",6379);
+        jedis.auth("123456");
+        jedis.select(1);
+    }
+    @Test
+	public void testSetDel()
     {
-    	Jedis jedis = new Jedis("182.254.213.106",6379);
-    	jedis.auth("123456");
-    	System.out.println("Server is running: "+jedis.ping());
-    	
-    	ZParams params = new ZParams().aggregate(ZParams.Aggregate.MAX);
-    	jedis.zinterstore("user:female", params, "sex:female", "user:"); //创建名为key的group和order的交集集合
-        jedis.expire("user:female", 60);
+		//set del  删除给定的一个或多个key 。
+		jedis.set("a","123");
+        jedis.set("b","123");
+        jedis.set("c","123");
+        Assert.assertTrue(jedis.del("aaa")==0);
+        Assert.assertTrue(jedis.del("a")==1);
+        Assert.assertTrue(jedis.del("b","c")==2);
+    }
+
+    @Test
+    public void testDumpRestore(){
+        //dump restore   序列化给定 key ，并返回被序列化的值，使用 RESTORE 命令可以将这个值反序列化为 Redis 键。
+		jedis.set("dump","dump","NX","EX",10);//  NX/XX-覆盖set/不覆盖set   EX/PX-seconds/milliseconds 10秒清除
+		jedis.hset("hashdump","hash","dump");
+		byte[] ss = jedis.dump("dump");
+		byte[] hashss = jedis.dump("hashdump");
+		System.out.println(ss.toString()+":::"+hashss);
+        //参数 ttl 以毫秒为单位为 key 设置生存时间；如果 ttl 为 0 ，那么不设置生存时间。
+        System.out.println(jedis.restore("dump-code",0,ss)+":::"+jedis.restore(hashss,10000,hashss));
+        System.out.println(ss.toString()+":::"+hashss);
+        Assert.assertTrue(jedis.get("dump-code").equals("dump"));
+        Assert.assertTrue(jedis.hget("hashdump","hash").equals("dump"));
+        Assert.assertTrue(jedis.del("dump-code")==1);
+        Assert.assertTrue(jedis.del("hashdump")==1);
+    }
+
+    @Test
+    public void testExistsExpireExpireat(){
+        //Exists  Expire ExpiteAt  生存时间
+        jedis.set("exist","exist");
+        jedis.set("existAt","existAt");
+        Assert.assertTrue(jedis.exists("exist"));
+        Assert.assertTrue(jedis.expire("exist",1)==1);
+        // 1.这里要考虑到服务器的时间和request的时间，2.而且是秒Unix timestamp，不是毫秒
+        Assert.assertTrue(jedis.expireAt("existAt",System.currentTimeMillis()/1000+5)==1);
+        System.out.println(System.currentTimeMillis()/1000+5);
+        try {
+            Thread.sleep(5050);
+        } catch (InterruptedException e) {
+            Assert.fail("线程休眠异常");
+        }
+        System.out.println(System.currentTimeMillis()/1000);
+        Assert.assertTrue(!jedis.exists("exist"));
+        Assert.assertTrue(!jedis.exists("existAt"));
+    }
+
+    @Test
+    public void testKeys(){
+        //Keys   查找所有符合给定模式 pattern 的 key 。
+        jedis.set("ont","one","NX","EX",10);
+        jedis.set("two","one","NX","EX",10);
+        jedis.set("three","one","NX","EX",10);
+        jedis.set("four","one","NX","EX",10);
+        Assert.assertTrue(jedis.keys("*").size()==4);
+        Assert.assertTrue(jedis.keys("t*").size()==2);
+        Assert.assertTrue(jedis.keys("t??").size()==1);
+        Assert.assertTrue(jedis.keys("f[ab]ur").size()==0);
+        Assert.assertTrue(jedis.keys("f[ou]ur").size()==1);
+    }
+
+    @Test
+    public void testMigrate(){
+        //MIGRATE 将 key 原子性地从当前实例传送到目标实例的指定数据库上
+        // ，一旦传送成功，key 保证会出现在目标实例上，而当前实例上的 key 会被删除。
+        //云服务器内存有限，就不开两个实例了
+    }
+
+    @Test
+    public void testMove(){
+        //MOVE 同一个redis不同库之间的“剪切”
+        jedis.select(1);
+        jedis.set("move","123");
+        jedis.expire("move",5);//还是会生效
+        Assert.assertTrue(jedis.move("move",2)==1);
+    }
+
+    @Test
+    public void testObject(){
+        //OBJECT 命令允许从内部察看给定 key 的 Redis 对象。
+        jedis.set("object","object111111111111111111111111111111111111111111111111111111111","NX","EX",10);
+        String ss = jedis.get("object");
+        System.out.println(jedis.objectEncoding("object"));//内部表示
+        System.out.println(jedis.objectIdletime("object"));//自储存以来的空闲时间
+        System.out.println(jedis.objectRefcount("object"));//引用次数
+    }
+
+    @Test
+    public void testPersist(){
+        //Expire 指定时间后删除  PERSIST  移除给定 key 的生存时间
+        jedis.set("PERSIST","PERSIST","NX","EX",2);
+        jedis.persist("PERSIST");
+        try {
+            Thread.sleep(2200);
+        } catch (InterruptedException e) {
+            Assert.fail("主线程休眠异常");
+        }
+        Assert.assertTrue(jedis.get("PERSIST")!=null&&jedis.get("PERSIST").equals("PERSIST"));
+        Assert.assertTrue(jedis.del("PERSIST")==1);
+    }
+
+    @Test
+    public void testPexpirePexpireAt(){
+        //Pexpire  PexpireAt  毫秒级别的expire
+        jedis.set("exist","exist");
+        jedis.set("existAt","existAt");
+        Assert.assertTrue(jedis.pexpire("exist",1000)==1);
+        // 1.这里要考虑到服务器的时间和request的时间，2.而且是秒Unix timestamp，不是毫秒
+        Assert.assertTrue(jedis.pexpireAt("existAt",System.currentTimeMillis()+5000)==1);
+        System.out.println(System.currentTimeMillis()+5000);
+        try {
+            Thread.sleep(5050);
+        } catch (InterruptedException e) {
+            Assert.fail("线程休眠异常");
+        }
+        System.out.println(System.currentTimeMillis());
+        Assert.assertTrue(!jedis.exists("exist"));
+        Assert.assertTrue(!jedis.exists("existAt"));
+    }
+
+    @Test
+    public void testPttlTtl(){
+        //ttl 查看生存剩余时间  pttl 毫秒级
+        jedis.set("ttl","ttl","NX","EX",10);
+        System.out.println(jedis.ttl("ttl"));
+        System.out.println(jedis.pttl("ttl"));
+    }
+
+    @Test
+    public void testRandomKey(){
+        //RANDOMKEY  从当前数据库中随机返回(不删除)一个 key 。
+//        System.setProperty("http.proxySet", "true");
+//        System.setProperty("http.proxyHost", "127.0.0.1");
+//        System.setProperty("http.proxyPort", "8888");
+        //TODO 有没有可能抓个包，判断下速度
+        for(int i=0;i<100;i++){
+            jedis.set("random"+i,String.valueOf(Math.random()),"NX","EX",10);
+        }
+        for(int i=0;i<10;i++){
+            System.out.println(jedis.get(jedis.randomKey()));
+        }
+    }
+
+    @Test
+    public void testRename(){
+        //rename 将 key 改名为 newkey
+        //renamenx 当且仅当 newkey 不存在时，将 key 改名为 newkey 。
+        jedis.set("one","1","NX","EX",10);
+        jedis.set("two","2","NX","EX",10);
+        Assert.assertTrue(jedis.exists("one"));
+        jedis.renamenx("one","three");
+        Assert.assertTrue(!jedis.exists("one"));
+        Assert.assertTrue(jedis.exists("three"));
+        jedis.rename("two","three"); //如果rename的新旧key都存在，那就保留旧key的值
+        Assert.assertTrue(!jedis.exists("two"));
+        Assert.assertTrue(jedis.get("three").equals("2"));
+    }
+
+    @Test
+    public void testSort(){
+        //sort 返回或保存给定列表、集合、有序集合 key 中经过排序的元素。
+        for(int i=0;i<100;i++){
+            jedis.lpush("sort",String.valueOf((int)(Math.random()*100)));
+        }
+        List list = jedis.sort("sort");
+        System.out.println("排序后:"+list.toString());
+        Assert.assertTrue(jedis.sort("sort","dstkey")==100);
+        jedis.del("sort","dstkey");
+    }
+
+    @Test
+    public void testType(){
+        //type 数据类型
+        jedis.set("a","b");
+        Assert.assertTrue(jedis.type("a").equals("string"));
+        jedis.del("a");
+    }
+
+    @Test
+    public void testScan(){
+        /**
+         SCAN 命令用于迭代当前数据库中的数据库键。
+         SSCAN 命令用于迭代集合键中的元素。
+         HSCAN 命令用于迭代哈希键中的键值对。
+         ZSCAN 命令用于迭代有序集合中的元素（包括元素成员和元素分值）。
+         */
+        //TODO 明天搞
+        ScanResult<String> result =  jedis.scan(0);
+        for(String key :result.getResult()){
+            System.out.println(key);
+        }
     }
 }
-/*1.对value操作的命令
-
-     exists(key)：确认一个key是否存在
-
-     del(key)：删除一个key
-
-     type(key)：返回值的类型
-
-     keys(pattern)：返回满足给定pattern的所有key
-
-     randomkey：随机返回key空间的一个key
-
-     rename(oldname, newname)：将key由oldname重命名为newname，若newname存在则删除newname表示的key
-
-     dbsize：返回当前数据库中key的数目
-
-     expire：设定一个key的活动时间（s）
-
-     ttl：获得一个key的活动时间
-
-     select(index)：按索引查询
-
-     move(key, dbindex)：将当前数据库中的key转移到有dbindex索引的数据库
-
-     flushdb：删除当前选择数据库中的所有key
-
-     flushall：删除所有数据库中的所有key
-
-2.对String操作的命令
-
-     set(key, value)：给数据库中名称为key的string赋予值value
-
-     get(key)：返回数据库中名称为key的string的value
-
-     getset(key, value)：给名称为key的string赋予上一次的value
-
-     mget(key1, key2,…, key N)：返回库中多个string（它们的名称为key1，key2…）的value
-
-     setnx(key, value)：如果不存在名称为key的string，则向库中添加string，名称为key，值为value
-
-     setex(key, time, value)：向库中添加string（名称为key，值为value）同时，设定过期时间time
-
-     mset(key1, value1, key2, value2,…key N, value N)：同时给多个string赋值，名称为key i的string赋值value i
-
-     msetnx(key1, value1, key2, value2,…key N, value N)：如果所有名称为key i的string都不存在，则向库中添加string，名称key i赋值为value i
-
-     incr(key)：名称为key的string增1操作
-
-     incrby(key, integer)：名称为key的string增加integer
-
-     decr(key)：名称为key的string减1操作
-
-     decrby(key, integer)：名称为key的string减少integer
-
-     append(key, value)：名称为key的string的值附加value
-
-     substr(key, start, end)：返回名称为key的string的value的子串
-
-3.对List操作的命令
-
-     rpush(key, value)：在名称为key的list尾添加一个值为value的元素
-
-     lpush(key, value)：在名称为key的list头添加一个值为value的 元素
-
-     llen(key)：返回名称为key的list的长度
-
-     lrange(key, start, end)：返回名称为key的list中start至end之间的元素（下标从0开始，下同）
-
-     ltrim(key, start, end)：截取名称为key的list，保留start至end之间的元素
-
-     lindex(key, index)：返回名称为key的list中index位置的元素
-
-     lset(key, index, value)：给名称为key的list中index位置的元素赋值为value
-
-     lrem(key, count, value)：删除count个名称为key的list中值为value的元素。count为0，删除所有值为value的元素，count>0      从头至尾删除count个值为value的元素，count<0从尾到头删除|count|个值为value的元素。
-
-     lpop(key)：返回并删除名称为key的list中的首元素
-
-     rpop(key)：返回并删除名称为key的list中的尾元素
-
-     blpop(key1, key2,… key N, timeout)：lpop 命令的block版本。即当timeout为0时，若遇到名称为key i的list不存在或该list为空，则命令结束。如果 timeout>0，则遇到上述情况时，等待timeout秒，如果问题没有解决，则对key i+1开始的list执行pop操作。
-
-     brpop(key1, key2,… key N, timeout)：rpop的block版本。参考上一命令。
-
-     rpoplpush(srckey, dstkey)：返回并删除名称为srckey的list的尾元素，并将该元素添加到名称为dstkey的list的头部
-
-4.对Set操作的命令
-
-     sadd(key, member)：向名称为key的set中添加元素member
-
-     srem(key, member) ：删除名称为key的set中的元素member
-
-     spop(key) ：随机返回并删除名称为key的set中一个元素
-
-     smove(srckey, dstkey, member) ：将member元素从名称为srckey的集合移到名称为dstkey的集合
-
-     scard(key) ：返回名称为key的set的基数
-
-     sismember(key, member) ：测试member是否是名称为key的set的元素
-
-     sinter(key1, key2,…key N) ：求交集
-
-     sinterstore(dstkey, key1, key2,…key N) ：求交集并将交集保存到dstkey的集合
-
-     sunion(key1, key2,…key N) ：求并集
-
-     sunionstore(dstkey, key1, key2,…key N) ：求并集并将并集保存到dstkey的集合
-
-     sdiff(key1, key2,…key N) ：求差集
-
-     sdiffstore(dstkey, key1, key2,…key N) ：求差集并将差集保存到dstkey的集合
-
-     smembers(key) ：返回名称为key的set的所有元素
-
-     srandmember(key) ：随机返回名称为key的set的一个元素
-
-5.对zset（sorted set）操作的命令
-
-     zadd(key, score, member)：向名称为key的zset中添加元素member，score用于排序。如果该元素已经存在，则根据score更新该元素的顺序。
-
-     zrem(key, member) ：删除名称为key的zset中的元素member
-
-     zincrby(key, increment, member) ：如果在名称为key的zset中已经存在元素member，则该元素的score增加increment；否则向集合中添加该元素，其score的值为increment
-
-     zrank(key, member) ：返回名称为key的zset（元素已按score从小到大排序）中member元素的rank（即index，从0开始），若没有member元素，返回“nil”
-
-     zrevrank(key, member) ：返回名称为key的zset（元素已按score从大到小排序）中member元素的rank（即index，从0开始），若没有member元素，返回“nil”
-
-     zrange(key, start, end)：返回名称为key的zset（元素已按score从小到大排序）中的index从start到end的所有元素
-
-     zrevrange(key, start, end)：返回名称为key的zset（元素已按score从大到小排序）中的index从start到end的所有元素
-
-     zrangebyscore(key, min, max)：返回名称为key的zset中score >= min且score <= max的所有元素
-
-     zcard(key)：返回名称为key的zset的基数
-
-     zscore(key, element)：返回名称为key的zset中元素element的score
-
-     zremrangebyrank(key, min, max)：删除名称为key的zset中rank >= min且rank <= max的所有元素
-
-     zremrangebyscore(key, min, max) ：删除名称为key的zset中score >= min且score <= max的所有元素
-
-     zunionstore / zinterstore(dstkeyN, key1,…,keyN, WEIGHTS w1,…wN, AGGREGATE SUM|MIN|MAX)：对N个zset求并集和交集，并将最后的集合保存在dstkeyN中。对于集合中每一个元素的score，在进行AGGREGATE运算前，都要乘以对于的WEIGHT参数。如果没有提供WEIGHT，默认为1。默认的AGGREGATE是SUM，即结果集合中元素的score是所有集合对应元素进行 SUM运算的值，而MIN和MAX是指，结果集合中元素的score是所有集合对应元素中最小值和最大值。
-
-6.对Hash操作的命令
-
-     hset(key, field, value)：向名称为key的hash中添加元素field<—>value
-
-     hget(key, field)：返回名称为key的hash中field对应的value
-
-     hmget(key, field1, …,field N)：返回名称为key的hash中field i对应的value
-
-     hmset(key, field1, value1,…,field N, value N)：向名称为key的hash中添加元素field i<—>value i
-
-     hincrby(key, field, integer)：将名称为key的hash中field的value增加integer
-
-     hexists(key, field)：名称为key的hash中是否存在键为field的域
-
-     hdel(key, field)：删除名称为key的hash中键为field的域
-
-     hlen(key)：返回名称为key的hash中元素个数
-
-     hkeys(key)：返回名称为key的hash中所有键
-
-     hvals(key)：返回名称为key的hash中所有键对应的value
-
-     hgetall(key)：返回名称为key的hash中所有的键（field）及其对应的value
-     */

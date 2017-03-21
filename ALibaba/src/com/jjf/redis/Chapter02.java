@@ -27,9 +27,9 @@ public class Chapter02 {
         conn.select(Chapter02.DATASOURCE_SELECT);
 
         testLoginCookies(conn);
-        testShopppingCartCookies(conn);
-        testCacheRows(conn);
-        testCacheRequest(conn);
+//        testShopppingCartCookies(conn);
+//        testCacheRows(conn);
+//        testCacheRequest(conn);
     }
 
     public void testLoginCookies(Jedis conn)
@@ -88,8 +88,8 @@ public class Chapter02 {
         System.out.println("Let's clean out our sessions and carts");
         CleanFullSessionsThread thread = new CleanFullSessionsThread(0);
         thread.start();
-        Thread.sleep(1000);
-        thread.quit();
+        Thread.sleep(1000);//这段时间清除会话
+        thread.quit();//线程标志来控制线程的停止
         Thread.sleep(2000);
         if (thread.isAlive()){
             throw new RuntimeException("The clean sessions thread is still alive?!?");
@@ -190,8 +190,8 @@ public class Chapter02 {
         conn.zadd("recent:", timestamp, token);
         if (item != null) {
             conn.zadd("viewed:" + token, timestamp, item);
-            conn.zremrangeByRank("viewed:" + token, 0, -26);
-            conn.zincrby("viewed:", -1, item);
+            conn.zremrangeByRank("viewed:" + token, 0, -26);//移除有序集 key 中，指定排名(rank)区间内的所有成员。
+            conn.zincrby("viewed:", -1, item); //自增
         }
     }
 
@@ -282,7 +282,7 @@ public class Chapter02 {
 
         public void run() {
             while (!quit) {
-                long size = conn.zcard("recent:");
+                long size = conn.zcard("recent:"); //count
                 if (size <= limit){
                     try {
                         sleep(1000);
