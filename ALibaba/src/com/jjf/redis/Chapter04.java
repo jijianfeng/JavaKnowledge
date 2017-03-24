@@ -10,16 +10,20 @@ import java.util.Map;
 import java.util.Set;
 
 public class Chapter04 {
+    static final String DATASOURCE_URL = "182.254.213.106";
+    static final int DATASOURCE_SORT = 6379;
+    static final String DATASOURCE_PASS = "123456";
+    static final int DATASOURCE_SELECT = 14;
     public static final void main(String[] args) {
         new Chapter04().run();
     }
 
     public void run() {
-        Jedis conn = new Jedis("localhost");
-        conn.select(15);
-
-        testListItem(conn, false);
-        testPurchaseItem(conn);
+        Jedis conn = new Jedis(DATASOURCE_URL,DATASOURCE_SORT);
+        conn.auth(DATASOURCE_PASS);
+        conn.select(DATASOURCE_SELECT);
+//        testListItem(conn, false);
+//        testPurchaseItem(conn);
         testBenchmarkUpdateToken(conn);
     }
 
@@ -32,7 +36,7 @@ public class Chapter04 {
         String seller = "userX";
         String item = "itemX";
         conn.sadd("inventory:" + seller, item);
-        Set<String> i = conn.smembers("inventory:" + seller);
+        Set<String> i = conn.smembers("inventory:" + seller);//返回所有成员
 
         System.out.println("The user's inventory has:");
         for (String member : i){
@@ -92,7 +96,7 @@ public class Chapter04 {
 
     public void testBenchmarkUpdateToken(Jedis conn) {
         System.out.println("\n----- testBenchmarkUpdate -----");
-        benchmarkUpdateToken(conn, 5);
+        benchmarkUpdateToken(conn, 50);
     }
 
     public boolean listItem(
@@ -104,14 +108,14 @@ public class Chapter04 {
 
         while (System.currentTimeMillis() < end) {
             conn.watch(inventory);
-            if (!conn.sismember(inventory, itemId)){
+            if (!conn.sismember(inventory, itemId)){  //判断itemId是不是inventory集合的成员
                 conn.unwatch();
                 return false;
             }
 
-            Transaction trans = conn.multi();
+            Transaction trans = conn.multi(); //标记一个事物，只有提交后才会执行
             trans.zadd("market:", price, item);
-            trans.srem(inventory, itemId);
+            trans.srem(inventory, itemId); //移除元素
             List<Object> results = trans.exec();
             // null response indicates that the transaction was aborted due to
             // the watched key changing.
@@ -159,6 +163,11 @@ public class Chapter04 {
         return false;
     }
 
+    /**
+     * 非事务型流水线
+     * @param conn
+     * @param duration
+     */
     public void benchmarkUpdateToken(Jedis conn, int duration) {
         try{
             @SuppressWarnings("rawtypes")
@@ -178,10 +187,10 @@ public class Chapter04 {
                 }
                 long delta = System.currentTimeMillis() - start;
                 System.out.println(
-                        method.getName() + ' ' +
-                        count + ' ' +
-                        (delta / 1000) + ' ' +
-                        (count / (delta / 1000)));
+                        method.getName() + "运行了" +
+                        count + "次在" +
+                        (delta / 1000) + "秒内，每秒" +
+                        (count / (delta / 1000))+"次");
             }
         }catch(Exception e){
             throw new RuntimeException(e);
@@ -201,7 +210,8 @@ public class Chapter04 {
 
     public void updateTokenPipeline(Jedis conn, String token, String user, String item) {
         long timestamp = System.currentTimeMillis() / 1000;
-        Pipeline pipe = conn.pipelined();
+        Pipeline pipe = conn.pipelined();//提供非事务型流水线 ，一次性提交，减少通信次数
+        pipe.multi();
         pipe.hset("login:", token, user);
         pipe.zadd("recent:", timestamp, token);
         if (item != null){

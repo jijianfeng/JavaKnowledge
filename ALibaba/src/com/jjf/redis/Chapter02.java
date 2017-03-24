@@ -26,12 +26,17 @@ public class Chapter02 {
         conn.auth(Chapter02.DATASOURCE_PASS);
         conn.select(Chapter02.DATASOURCE_SELECT);
 
-        testLoginCookies(conn);
+//        testLoginCookies(conn);
 //        testShopppingCartCookies(conn);
-//        testCacheRows(conn);
+        testCacheRows(conn);
 //        testCacheRequest(conn);
     }
 
+    /**
+     * 测试登录缓存
+     * @param conn
+     * @throws InterruptedException
+     */
     public void testLoginCookies(Jedis conn)
         throws InterruptedException
     {
@@ -52,20 +57,25 @@ public class Chapter02 {
         System.out.println("Let's drop the maximum number of cookies to 0 to clean them out");
         System.out.println("We will start a thread to do the cleaning, while we stop it later");
 
-        CleanSessionsThread thread = new CleanSessionsThread(0);
-        thread.start();
-        Thread.sleep(1000);
-        thread.quit();
-        Thread.sleep(2000);
-        if (thread.isAlive()){
-            throw new RuntimeException("The clean sessions thread is still alive?!?");
-        }
-
-        long s = conn.hlen("login:");
-        System.out.println("The current number of sessions still available is: " + s);
-        assert s == 0;
+//        CleanSessionsThread thread = new CleanSessionsThread(0);
+//        thread.start();
+//        Thread.sleep(1000);
+//        thread.quit();
+//        Thread.sleep(2000);
+//        if (thread.isAlive()){
+//            throw new RuntimeException("The clean sessions thread is still alive?!?");
+//        }
+//
+//        long s = conn.hlen("login:");
+//        System.out.println("The current number of sessions still available is: " + s);
+//        assert s == 0;
     }
 
+    /**
+     * 测试购物车缓存
+     * @param conn
+     * @throws InterruptedException
+     */
     public void testShopppingCartCookies(Jedis conn)
         throws InterruptedException
     {
@@ -85,27 +95,30 @@ public class Chapter02 {
 
         assert r.size() >= 1;
 
-        System.out.println("Let's clean out our sessions and carts");
-        CleanFullSessionsThread thread = new CleanFullSessionsThread(0);
-        thread.start();
-        Thread.sleep(1000);//这段时间清除会话
-        thread.quit();//线程标志来控制线程的停止
-        Thread.sleep(2000);
-        if (thread.isAlive()){
-            throw new RuntimeException("The clean sessions thread is still alive?!?");
-        }
-
-        r = conn.hgetAll("cart:" + token);
-        System.out.println("Our shopping cart now contains:");
-        for (Map.Entry<String,String> entry : r.entrySet()){
-            System.out.println("  " + entry.getKey() + ": " + entry.getValue());
-        }
-        assert r.size() == 0;
+//        System.out.println("Let's clean out our sessions and carts");
+//        CleanFullSessionsThread thread = new CleanFullSessionsThread(0);
+//        thread.start();
+//        Thread.sleep(1000);//这段时间清除会话
+//        thread.quit();//线程标志来控制线程的停止
+//        Thread.sleep(2000);
+//        if (thread.isAlive()){
+//            throw new RuntimeException("The clean sessions thread is still alive?!?");
+//        }
+//
+//        r = conn.hgetAll("cart:" + token);
+//        System.out.println("Our shopping cart now contains:");
+//        for (Map.Entry<String,String> entry : r.entrySet()){
+//            System.out.println("  " + entry.getKey() + ": " + entry.getValue());
+//        }
+//        assert r.size() == 0;
     }
 
-    public void testCacheRows(Jedis conn)
-        throws InterruptedException
-    {
+    /**
+     * 测试缓存数据
+     * @param conn
+     * @throws InterruptedException
+     */
+    public void testCacheRows(Jedis conn) throws InterruptedException {
         System.out.println("\n----- testCacheRows -----");
         System.out.println("First, let's schedule caching of itemX every 5 seconds");
         scheduleRowCache(conn, "itemX", 5);
@@ -180,10 +193,23 @@ public class Chapter02 {
         assert !canCache(conn, "http://test.com/?item=itemX&_=1234536");
     }
 
+    /**
+     * 检查登录缓存
+     * @param conn
+     * @param token
+     * @return
+     */
     public String checkToken(Jedis conn, String token) {
         return conn.hget("login:", token);
     }
 
+    /**
+     * 更新登录缓存
+     * @param conn
+     * @param token
+     * @param user
+     * @param item
+     */
     public void updateToken(Jedis conn, String token, String user, String item) {
         long timestamp = System.currentTimeMillis() / 1000;
         conn.hset("login:", token, user);
@@ -195,6 +221,13 @@ public class Chapter02 {
         }
     }
 
+    /**
+     * 添加到购物车
+     * @param conn
+     * @param session
+     * @param item
+     * @param count
+     */
     public void addToCart(Jedis conn, String session, String item, int count) {
         if (count <= 0) {
             conn.hdel("cart:" + session, item);

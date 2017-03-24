@@ -152,6 +152,10 @@ public class Chapter01 {
         return getArticles(conn, page, key);
     }
 
+    /**
+     * ±éÀú´òÓ¡ÎÄÕÂ
+     * @param articles
+     */
     private void printArticles(List<Map<String,String>> articles){
         for (Map<String,String> article : articles){
             System.out.println("  id: " + article.get("id"));
