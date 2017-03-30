@@ -27,6 +27,10 @@ public class Chapter05 {
         new SimpleDateFormat("EEE MMM dd HH:00:00 yyyy");
     private static final SimpleDateFormat ISO_FORMAT =
         new SimpleDateFormat("yyyy-MM-dd'T'HH:00:00");
+    static final String DATASOURCE_URL = "182.254.213.106";
+    static final int DATASOURCE_SORT = 6379;
+    static final String DATASOURCE_PASS = "123456";
+    static final int DATASOURCE_SELECT = 14;
     static{
         ISO_FORMAT.setTimeZone(TimeZone.getTimeZone("UTC"));
     }
@@ -40,26 +44,32 @@ public class Chapter05 {
     public void run()
         throws InterruptedException
     {
-        Jedis conn = new Jedis("localhost");
-        conn.select(15);
+        Jedis conn = new Jedis(DATASOURCE_URL,DATASOURCE_SORT);
+        conn.auth(DATASOURCE_PASS);
+        conn.select(DATASOURCE_SELECT);
 
-        testLogRecent(conn);
-        testLogCommon(conn);
-        testCounters(conn);
-        testStats(conn);
-        testAccessTime(conn);
-        testIpLookup(conn);
-        testIsUnderMaintenance(conn);
+//        testLogRecent(conn); //存储日志
+//        testLogCommon(conn); //测试记录消息频率
+//        testCounters(conn); //测试计数器
+//        testStats(conn);  //存储统计数据
+//        testAccessTime(conn); //记录时间（太简单了吧.........）
+//        testIpLookup(conn); //查找IP及所属国家
+//        testIsUnderMaintenance(conn);  //读取配置
         testConfig(conn);
     }
 
+    /**
+     *
+     * 测试存储日志
+     * @param conn
+     */
     public void testLogRecent(Jedis conn) {
         System.out.println("\n----- testLogRecent -----");
         System.out.println("Let's write a few logs to the recent log");
         for (int i = 0; i < 5; i++) {
             logRecent(conn, "test", "this is message " + i);
         }
-        List<String> recent = conn.lrange("recent:test:info", 0, -1);
+        List<String> recent = conn.lrange("recent:test:info", 0, -1);//获得全部元素
         System.out.println(
                 "The current recent message log has this many messages: " +
                 recent.size());
@@ -70,6 +80,10 @@ public class Chapter05 {
         assert recent.size() >= 5;
     }
 
+    /**
+     * 测试记录消息频率
+     * @param conn
+     */
     public void testLogCommon(Jedis conn) {
         System.out.println("\n----- testLogCommon -----");
         System.out.println("Let's write some items to the common log");
@@ -87,6 +101,11 @@ public class Chapter05 {
         assert common.size() >= 5;
     }
 
+    /**
+     * 测试计数器
+     * @param conn
+     * @throws InterruptedException
+     */
     public void testCounters(Jedis conn)
         throws InterruptedException
     {
@@ -238,8 +257,8 @@ public class Chapter05 {
     public void logRecent(Jedis conn, String name, String message, String severity) {
         String destination = "recent:" + name + ':' + severity;
         Pipeline pipe = conn.pipelined();
-        pipe.lpush(destination, TIMESTAMP.format(new Date()) + ' ' + message);
-        pipe.ltrim(destination, 0, 99);
+        pipe.lpush(destination, TIMESTAMP.format(new Date()) + ' ' + message);//存表头
+        pipe.ltrim(destination, 0, 99);//只保留100个
         pipe.sync();
     }
 
@@ -264,7 +283,7 @@ public class Chapter05 {
                 trans.set(startKey, hourStart);
             }
 
-            trans.zincrby(commonDest, 1, message);
+            trans.zincrby(commonDest, 1, message);//sort增量
 
             String recentDest = "recent:" + name + ':' + severity;
             trans.lpush(recentDest, TIMESTAMP.format(new Date()) + ' ' + message);
@@ -422,8 +441,9 @@ public class Chapter05 {
     public Jedis redisConnection(String component){
         Jedis configConn = REDIS_CONNECTIONS.get("config");
         if (configConn == null){
-            configConn = new Jedis("localhost");
-            configConn.select(15);
+            configConn = new Jedis(DATASOURCE_URL,DATASOURCE_SORT);
+            configConn.auth(DATASOURCE_PASS);
+            configConn.select(DATASOURCE_SELECT);
             REDIS_CONNECTIONS.put("config", configConn);
         }
 
@@ -432,7 +452,9 @@ public class Chapter05 {
         Map<String,Object> config = getConfig(configConn, "redis", component);
 
         if (!config.equals(oldConfig)){
-            Jedis conn = new Jedis("localhost");
+            Jedis conn = new Jedis(DATASOURCE_URL,DATASOURCE_SORT);
+            conn.auth(DATASOURCE_PASS);
+            conn.select(DATASOURCE_SELECT);
             if (config.containsKey("db")){
                 conn.select(((Double)config.get("db")).intValue());
             }
@@ -544,8 +566,9 @@ public class Chapter05 {
         private long timeOffset; // used to mimic a time in the future.
 
         public CleanCountersThread(int sampleCount, long timeOffset){
-            this.conn = new Jedis("localhost");
-            this.conn.select(15);
+            this.conn = new Jedis(DATASOURCE_URL,DATASOURCE_SORT);
+            this.conn.auth(DATASOURCE_PASS);
+            this.conn.select(DATASOURCE_SELECT);
             this.sampleCount = sampleCount;
             this.timeOffset = timeOffset;
         }

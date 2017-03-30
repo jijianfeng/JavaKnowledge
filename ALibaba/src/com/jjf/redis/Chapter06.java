@@ -12,6 +12,10 @@ import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
 public class Chapter06 {
+    static final String DATASOURCE_URL = "182.254.213.106";
+    static final int DATASOURCE_SORT = 6379;
+    static final String DATASOURCE_PASS = "123456";
+    static final int DATASOURCE_SELECT = 14;
     public static final void main(String[] args)
         throws Exception
     {
@@ -21,16 +25,17 @@ public class Chapter06 {
     public void run()
         throws InterruptedException, IOException
     {
-        Jedis conn = new Jedis("localhost");
-        conn.select(15);
+        Jedis conn = new Jedis(DATASOURCE_URL,DATASOURCE_SORT);
+        conn.auth(DATASOURCE_PASS);
+        conn.select(DATASOURCE_SELECT);
 
-        testAddUpdateContact(conn);
-        testAddressBookAutocomplete(conn);
-        testDistributedLocking(conn);
-        testCountingSemaphore(conn);
-        testDelayedTasks(conn);
-        testMultiRecipientMessaging(conn);
-        testFileDistribution(conn);
+//        testAddUpdateContact(conn);
+//        testAddressBookAutocomplete(conn);//自动补全
+        testDistributedLocking(conn);//分布式锁
+//        testCountingSemaphore(conn);
+//        testDelayedTasks(conn);
+//        testMultiRecipientMessaging(conn);
+//        testFileDistribution(conn);
     }
 
     public void testAddUpdateContact(Jedis conn) {
@@ -111,7 +116,7 @@ public class Chapter06 {
         conn.del("members:test");
     }
 
-    public void testDistributedLocking(Jedis conn)
+    public void     testDistributedLocking(Jedis conn)
         throws InterruptedException
     {
         System.out.println("\n----- testDistributedLocking -----");
@@ -334,7 +339,7 @@ public class Chapter06 {
     public void addUpdateContact(Jedis conn, String user, String contact) {
         String acList = "recent:" + user;
         Transaction trans = conn.multi();
-        trans.lrem(acList, 0, contact);
+        trans.lrem(acList, 0, contact); //将联系人列表推入最前端 0表示匹配全删
         trans.lpush(acList, contact);
         trans.ltrim(acList, 0, 99);
         trans.exec();

@@ -24,7 +24,7 @@ public class Chapter04 {
         conn.select(DATASOURCE_SELECT);
 //        testListItem(conn, false);
 //        testPurchaseItem(conn);
-        testBenchmarkUpdateToken(conn);
+       testBenchmarkUpdateToken(conn);
     }
 
     public void testListItem(Jedis conn, boolean nested) {
@@ -96,7 +96,7 @@ public class Chapter04 {
 
     public void testBenchmarkUpdateToken(Jedis conn) {
         System.out.println("\n----- testBenchmarkUpdate -----");
-        benchmarkUpdateToken(conn, 50);
+        benchmarkUpdateToken(conn, 5);
     }
 
     public boolean listItem(
@@ -107,7 +107,7 @@ public class Chapter04 {
         long end = System.currentTimeMillis() + 5000;
 
         while (System.currentTimeMillis() < end) {
-            conn.watch(inventory);
+            conn.watch(inventory);  //监视一个(或多个) key ，如果在事务执行之前这个(或这些) key 被其他命令所改动，那么事务将被打断。 且解决了ABA问题
             if (!conn.sismember(inventory, itemId)){  //判断itemId是不是inventory集合的成员
                 conn.unwatch();
                 return false;
@@ -119,7 +119,7 @@ public class Chapter04 {
             List<Object> results = trans.exec();
             // null response indicates that the transaction was aborted due to
             // the watched key changing.
-            if (results == null){
+            if (results.size()==0){
                 continue;
             }
             return true;
@@ -176,6 +176,7 @@ public class Chapter04 {
             Method[] methods = new Method[]{
                 this.getClass().getDeclaredMethod("updateToken", args),
                 this.getClass().getDeclaredMethod("updateTokenPipeline", args),
+                this.getClass().getDeclaredMethod("updateTokenPipelineAndMulti",args)
             };
             for (Method method : methods){
                 int count = 0;
@@ -211,6 +212,19 @@ public class Chapter04 {
     public void updateTokenPipeline(Jedis conn, String token, String user, String item) {
         long timestamp = System.currentTimeMillis() / 1000;
         Pipeline pipe = conn.pipelined();//提供非事务型流水线 ，一次性提交，减少通信次数
+        pipe.hset("login:", token, user);
+        pipe.zadd("recent:", timestamp, token);
+        if (item != null){
+            pipe.zadd("viewed:" + token, timestamp, item);
+            pipe.zremrangeByRank("viewed:" + token, 0, -26);
+            pipe.zincrby("viewed:", -1, item);
+        }
+        pipe.sync();
+    }
+
+    public void updateTokenPipelineAndMulti(Jedis conn, String token, String user, String item) {
+        long timestamp = System.currentTimeMillis() / 1000;
+        Pipeline pipe = conn.pipelined();//提供非事务型流水线 ，一次性提交，减少通信次数
         pipe.multi();
         pipe.hset("login:", token, user);
         pipe.zadd("recent:", timestamp, token);
@@ -220,5 +234,6 @@ public class Chapter04 {
             pipe.zincrby("viewed:", -1, item);
         }
         pipe.exec();
+        pipe.sync();//注释掉这行 不取回，速度超快
     }
 }
