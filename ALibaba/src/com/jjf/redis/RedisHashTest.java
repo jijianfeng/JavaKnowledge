@@ -129,14 +129,23 @@ public class RedisHashTest {
     public void testHScan(){
         //HSCAN 命令用于迭代哈希键中的键值对。
         Map<String,String> data = new HashMap<>();
-        for(int i=0;i<10;i++){
+        for(int i=0;i<1000;i++){
             data.put("key"+i,String.valueOf(i));
         }
         jedis.hmset("hash",data);
-        ScanResult<Map.Entry<String, String>> result =  jedis.hscan("hash",DATASOURCE_SELECT);
-        for(Map.Entry<String, String> map :result.getResult()){
-            System.out.println(map.getKey()+":"+map.getValue());
+        ScanResult<Map.Entry<String, String>> result;// =  jedis.hscan("hash",DATASOURCE_SELECT);
+        int count = 0;
+        int cursor = 0;
+        do {
+            result = jedis.hscan("hash",cursor);
+            cursor = Integer.valueOf(result.getStringCursor());
+            for (Map.Entry<String, String> map : result.getResult()) {
+                System.out.println(map.getKey() + ":" + map.getValue());
+                count++;
+            }
         }
+        while(cursor!=0);
+        Assert.assertTrue(count==1000);
         Assert.assertTrue(jedis.del("hash")==1);
     }
 

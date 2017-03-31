@@ -31,8 +31,8 @@ public class Chapter06 {
 
 //        testAddUpdateContact(conn);
 //        testAddressBookAutocomplete(conn);//自动补全
-        testDistributedLocking(conn);//分布式锁
-//        testCountingSemaphore(conn);
+//        testDistributedLocking(conn);//Redis实现锁
+        testCountingSemaphore(conn); //计数信号量锁
 //        testDelayedTasks(conn);
 //        testMultiRecipientMessaging(conn);
 //        testFileDistribution(conn);
