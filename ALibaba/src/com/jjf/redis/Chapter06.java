@@ -1,6 +1,7 @@
 package com.jjf.redis;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import org.junit.Assert;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.Transaction;
 import redis.clients.jedis.Tuple;
@@ -32,10 +33,10 @@ public class Chapter06 {
 //        testAddUpdateContact(conn);
 //        testAddressBookAutocomplete(conn);//自动补全
 //        testDistributedLocking(conn);//Redis实现锁
-        testCountingSemaphore(conn); //计数信号量锁
+//        testCountingSemaphore(conn); //计数信号量锁
 //        testDelayedTasks(conn);
 //        testMultiRecipientMessaging(conn);
-//        testFileDistribution(conn);
+        testFileDistribution(conn);
     }
 
     public void testAddUpdateContact(Jedis conn) {
@@ -153,11 +154,11 @@ public class Chapter06 {
         conn.del("testsem", "testsem:owner", "testsem:counter");
         System.out.println("Getting 3 initial semaphores with a limit of 3...");
         for (int i = 0; i < 3; i++) {
-            assert acquireFairSemaphore(conn, "testsem", 3, 1000) != null;
+            Assert.assertTrue( acquireFairSemaphore(conn, "testsem", 3, 1000) != null);
         }
         System.out.println("Done!");
         System.out.println("Getting one more that should fail...");
-        assert acquireFairSemaphore(conn, "testsem", 3, 1000) == null;
+        Assert.assertTrue( acquireFairSemaphore(conn, "testsem", 3, 1000) == null);
         System.out.println("Couldn't get it!");
         System.out.println();
 
@@ -165,15 +166,15 @@ public class Chapter06 {
         Thread.sleep(2000);
         System.out.println("Can we get one?");
         String id = acquireFairSemaphore(conn, "testsem", 3, 1000);
-        assert id != null;
+        Assert.assertTrue( id != null);
         System.out.println("Got one!");
         System.out.println("Let's release it...");
-        assert releaseFairSemaphore(conn, "testsem", id);
+        Assert.assertTrue( releaseFairSemaphore(conn, "testsem", id));
         System.out.println("Released!");
         System.out.println();
         System.out.println("And let's make sure we can get 3 more!");
         for (int i = 0; i < 3; i++) {
-            assert acquireFairSemaphore(conn, "testsem", 3, 1000) != null;
+            Assert.assertTrue( acquireFairSemaphore(conn, "testsem", 3, 1000) != null);
         }
         System.out.println("We got them!");
         conn.del("testsem", "testsem:owner", "testsem:counter");
@@ -255,6 +256,7 @@ public class Chapter06 {
             "chat:test:");
 
         System.out.println("Creating some temporary 'log' files...");
+        //准备文件
         File f1 = File.createTempFile("temp_redis_1_", ".txt");
         f1.deleteOnExit();
         Writer writer = new FileWriter(f1);
@@ -279,7 +281,7 @@ public class Chapter06 {
             writer.write("random line " + Long.toHexString(random.nextLong()) + '\n');
         }
         writer.close();
-
+        //复制日志
         long size = f3.length();
         System.out.println("Done.");
         System.out.println();
@@ -297,9 +299,9 @@ public class Chapter06 {
         TestCallback callback = new TestCallback();
         processLogsFromRedis(conn, "0", callback);
         System.out.println(Arrays.toString(callback.counts.toArray(new Integer[0])));
-        assert callback.counts.get(0) == 1;
-        assert callback.counts.get(1) == 100;
-        assert callback.counts.get(2) == 1000;
+        Assert.assertTrue(callback.counts.get(0) == 1);
+        Assert.assertTrue(callback.counts.get(1) == 100);
+        Assert.assertTrue(callback.counts.get(2) == 1000);
 
         System.out.println();
         System.out.println("Let's wait for the copy thread to finish cleaning up...");
@@ -491,7 +493,8 @@ public class Chapter06 {
     public String acquireFairSemaphore(
         Jedis conn, String semname, int limit, long timeout)
     {
-        String identifier = UUID.randomUUID().toString();
+        //acquireFairSemaphore(conn, "testsem", 3, 1000)
+        String identifier = UUID.randomUUID().toString();//随机标识符
         String czset = semname + ":owner";
         String ctr = semname + ":counter";
 
@@ -500,20 +503,20 @@ public class Chapter06 {
         trans.zremrangeByScore(
             semname.getBytes(),
             "-inf".getBytes(),
-            String.valueOf(now - timeout).getBytes());
+            String.valueOf(now - timeout).getBytes()); //删除超时信号量
         ZParams params = new ZParams();
         params.weights(1, 0);
-        trans.zinterstore(czset, params, czset, semname);
+        trans.zinterstore(czset, params, czset, semname); //求交集并存储
         trans.incr(ctr);
         List<Object> results = trans.exec();
-        int counter = ((Long)results.get(results.size() - 1)).intValue();
+        int counter = ((Long)results.get(results.size() - 1)).intValue();//获取自增后的值
 
         trans = conn.multi();
-        trans.zadd(semname, now, identifier);
+        trans.zadd(semname, now, identifier);//尝试获取信号量
         trans.zadd(czset, counter, identifier);
         trans.zrank(czset, identifier);
         results = trans.exec();
-        int result = ((Long)results.get(results.size() - 1)).intValue();
+        int result = ((Long)results.get(results.size() - 1)).intValue();//查看排名，如果小于limit，证明获得了信号量
         if (result < limit){
             return identifier;
         }
@@ -785,8 +788,9 @@ public class Chapter06 {
         private Gson gson = new Gson();
 
         public PollQueueThread(){
-            this.conn = new Jedis("localhost");
-            this.conn.select(15);
+            this.conn = new Jedis(DATASOURCE_URL,DATASOURCE_SORT);
+            this.conn.auth(DATASOURCE_PASS);
+            this.conn.select(DATASOURCE_SELECT);
         }
 
         public void quit() {
@@ -835,8 +839,9 @@ public class Chapter06 {
         private long limit;
 
         public CopyLogsThread(File path, String channel, int count, long limit) {
-            this.conn = new Jedis("localhost");
-            this.conn.select(15);
+            this.conn = new Jedis(DATASOURCE_URL,DATASOURCE_SORT);
+            this.conn.auth(DATASOURCE_PASS);
+            this.conn.select(DATASOURCE_SELECT);
             this.path = path;
             this.channel = channel;
             this.count = count;

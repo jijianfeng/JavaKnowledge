@@ -11,7 +11,10 @@ public class Chapter08 {
     private static int HOME_TIMELINE_SIZE = 1000;
     private static int POSTS_PER_PASS = 1000;
     private static int REFILL_USERS_STEP = 50;
-
+    static final String DATASOURCE_URL = "182.254.213.106";
+    static final int DATASOURCE_SORT = 6379;
+    static final String DATASOURCE_PASS = "123456";
+    static final int DATASOURCE_SELECT = 14;
     public static final void main(String[] args)
         throws InterruptedException
     {
@@ -21,8 +24,9 @@ public class Chapter08 {
     public void run()
         throws InterruptedException
     {
-        Jedis conn = new Jedis("localhost");
-        conn.select(15);
+        Jedis conn = new Jedis(DATASOURCE_URL,DATASOURCE_SORT);
+        conn.auth(DATASOURCE_PASS);
+        conn.select(DATASOURCE_SELECT);
         conn.flushDB();
 
         testCreateUserAndStatus(conn);
@@ -539,8 +543,9 @@ public class Chapter08 {
         }
 
         public void run() {
-            Jedis conn = new Jedis("localhost");
-            conn.select(15);
+            Jedis conn = new Jedis(DATASOURCE_URL,DATASOURCE_SORT);
+            conn.auth(DATASOURCE_PASS);
+            conn.select(DATASOURCE_SELECT);
 
             Object[] args = new Object[this.args.length + 1];
             System.arraycopy(this.args, 0, args, 1, this.args.length);

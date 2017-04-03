@@ -11,6 +11,10 @@ import java.util.*;
 import java.util.zip.CRC32;
 
 public class Chapter09 {
+    static final String DATASOURCE_URL = "182.254.213.106";
+    static final int DATASOURCE_SORT = 6379;
+    static final String DATASOURCE_PASS = "123456";
+    static final int DATASOURCE_SELECT = 14;
     private static final String[] COUNTRIES = (
         "ABW AFG AGO AIA ALA ALB AND ARE ARG ARM ASM ATA ATF ATG AUS AUT AZE BDI " +
         "BEL BEN BES BFA BGD BGR BHR BHS BIH BLM BLR BLZ BMU BOL BRA BRB BRN BTN " +
@@ -47,22 +51,24 @@ public class Chapter09 {
     }
 
     public void run() {
-        Jedis conn = new Jedis("localhost");
-        conn.select(15);
+        Jedis conn = new Jedis(DATASOURCE_URL,DATASOURCE_SORT);
+        conn.auth(DATASOURCE_PASS);
+        conn.select(DATASOURCE_SELECT);
         conn.flushDB();
 
-        testLongZiplistPerformance(conn);
+//        testLongZiplistPerformance(conn);
         testShardKey(conn);
-        testShardedHash(conn);
-        testShardedSadd(conn);
-        testUniqueVisitors(conn);
-        testUserLocation(conn);
+//        testShardedHash(conn);
+//        testShardedSadd(conn);
+//        testUniqueVisitors(conn);
+//        testUserLocation(conn);
     }
 
     public void testLongZiplistPerformance(Jedis conn) {
         System.out.println("\n----- testLongZiplistPerformance -----");
 
-        longZiplistPerformance(conn, "test", 5, 10, 10);
+        double number = longZiplistPerformance(conn, "test", 5, 10, 10);
+//        System.out.println("‘À––¡À"+number);
         assert conn.llen("test") == 5;
     }
 

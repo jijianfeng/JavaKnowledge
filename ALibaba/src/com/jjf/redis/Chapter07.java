@@ -1,5 +1,6 @@
 package com.jjf.redis;
 import org.javatuples.Pair;
+import org.junit.Assert;
 import redis.clients.jedis.*;
 
 import java.util.*;
@@ -7,9 +8,17 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Chapter07 {
+    static final String DATASOURCE_URL = "182.254.213.106";
+    static final int DATASOURCE_SORT = 6379;
+    static final String DATASOURCE_PASS = "123456";
+    static final int DATASOURCE_SELECT = 14;
     private static final Pattern QUERY_RE = Pattern.compile("[+-]?[a-z']{2,}");
     private static final Pattern WORDS_RE = Pattern.compile("[a-z']{2,}");
     private static final Set<String> STOP_WORDS = new HashSet<String>();
+
+    /**
+     * 常见词汇
+     */
     static {
         for (String word :
                 ("able about across after all almost also am among " +
@@ -39,22 +48,23 @@ public class Chapter07 {
     }
 
     public void run(){
-        Jedis conn = new Jedis("localhost");
-        conn.select(15);
-        conn.flushDB();
+        Jedis conn = new Jedis(DATASOURCE_URL,DATASOURCE_SORT);
+        conn.auth(DATASOURCE_PASS);
+        conn.select(DATASOURCE_SELECT);
+        conn.flushDB();//删除所有key
 
-        testIndexDocument(conn);
+//        testIndexDocument(conn); //分词索引搜索
         testSetOperations(conn);
-        testParseQuery(conn);
-        testParseAndSearch(conn);
-        testSearchWithSort(conn);
-        testSearchWithZsort(conn);
-        conn.flushDB();
-
-        testStringToScore(conn);
-        testIndexAndTargetAds(conn);
-        testIsQualifiedForJob(conn);
-        testIndexAndFindJobs(conn);
+//        testParseQuery(conn);
+//        testParseAndSearch(conn);
+//        testSearchWithSort(conn);
+//        testSearchWithZsort(conn);
+//        conn.flushDB();
+//
+//        testStringToScore(conn);
+//        testIndexAndTargetAds(conn);
+//        testIsQualifiedForJob(conn);
+//        testIndexAndFindJobs(conn);
     }
 
     public void testIndexDocument(Jedis conn) {
@@ -64,16 +74,16 @@ public class Chapter07 {
         Set<String> tokens = tokenize(CONTENT);
         System.out.println("Those tokens are: " +
             Arrays.toString(tokens.toArray()));
-        assert tokens.size() > 0;
+        Assert.assertTrue( tokens.size() > 0);
 
         System.out.println("And now we are indexing that content...");
-        int count = indexDocument(conn, "test", CONTENT);
-        assert count == tokens.size();
+        int count = indexDocument(conn, "test", CONTENT); //针对文章test的内容建立索引
+        Assert.assertTrue(  count == tokens.size());
         Set<String> test = new HashSet<String>();
         test.add("test");
         for (String t : tokens){
             Set<String> members = conn.smembers("idx:" + t);
-            assert test.equals(members);
+            Assert.assertTrue( test.equals(members));
         }
     }
 
@@ -326,6 +336,11 @@ public class Chapter07 {
         assert "test3".equals(result.next());
     }
 
+    /**
+     * 返回content中的常见词汇
+     * @param content
+     * @return
+     */
     public Set<String> tokenize(String content) {
         Set<String> words = new HashSet<String>();
         Matcher matcher = WORDS_RE.matcher(content);
@@ -338,6 +353,13 @@ public class Chapter07 {
         return words;
     }
 
+    /**
+     * 针对文章内容建立索引
+     * @param conn
+     * @param docid
+     * @param content
+     * @return
+     */
     public int indexDocument(Jedis conn, String docid, String content) {
         Set<String> words = tokenize(content);
         Transaction trans = conn.multi();
