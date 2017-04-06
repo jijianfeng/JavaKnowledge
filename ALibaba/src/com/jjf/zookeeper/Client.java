@@ -39,6 +39,13 @@ public class Client implements Watcher {
 
     @Override
     public void process(WatchedEvent event) {
+        System.out.println(event);
+    }
 
+    public static void main(String[] args) throws IOException, KeeperException, InterruptedException {
+        Client c = new Client("118.190.92.176:2181");
+        c.startZK();
+        String name = c.queueCommand("1031397017");
+        System.out.println("¥¥Ω®¡À"+name);
     }
 }
