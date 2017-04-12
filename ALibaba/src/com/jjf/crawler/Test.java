@@ -1,5 +1,11 @@
 package com.jjf.crawler;
 
+import org.apache.http.client.HttpClient;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
@@ -7,13 +13,6 @@ import java.io.OutputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
 
 public class Test {
 	public static void main(String args[]) throws Exception{
@@ -109,16 +108,16 @@ class RosiHtmlParser implements Runnable {
 	}
 }
 
-class RosiImageCreator implements Runnable {
-	private static int count = 0;
-	private String imageUrl;
-	private String title;
-	private int page;
-	private int listS;
-	private int girlsCount;
-	 //存储路径，自定义
-	private static final String basePath = "E:/rosi/3"; 
-	public RosiImageCreator(int listS,int girlsCount,String imageUrl,String title,int page) {
+		class RosiImageCreator implements Runnable {
+			private static int count = 0;
+			private String imageUrl;
+			private String title;
+			private int page;
+			private int listS;
+			private int girlsCount;
+			//存储路径，自定义
+			private static final String basePath = "E:/rosi/3";
+			public RosiImageCreator(int listS,int girlsCount,String imageUrl,String title,int page) {
 //		System.out.println(imageUrl);
 		this.imageUrl = imageUrl;//http://img.77tuba.com/upimgs/allimg/160830/11615291495.jpg
 		this.page = page;
@@ -129,19 +128,19 @@ class RosiImageCreator implements Runnable {
 	@Override
 	public void run() {
 		File dir = new File(basePath);
-		if(!dir.exists()){
-			dir.mkdirs();
-			System.out.println("图片存放于"+basePath+"目录下");
-		}
-		String imageName = imageUrl.substring(imageUrl.lastIndexOf("/")+1);
-		try {
+			if(!dir.exists()){
+				dir.mkdirs();
+				System.out.println("图片存放于"+basePath+"目录下");
+			}
+			String imageName = imageUrl.substring(imageUrl.lastIndexOf("/")+1);
+			try {
 //			String path = (basePath+"/"+title+"/"+page+"--"+imageName).replace(" ", "");
 //			System.out.println(path);
 //			File file = new File(path);
-			File file = new File( basePath+"/"+listS+"-"+girlsCount+"-"+page+"-"+title+"-"+imageName);
-			OutputStream os = new FileOutputStream(file);
-			//创建一个url对象
-			URL url = new URL(imageUrl);
+				File file = new File( basePath+"/"+listS+"-"+girlsCount+"-"+page+"-"+title+"-"+imageName);
+				OutputStream os = new FileOutputStream(file);
+				//创建一个url对象
+				URL url = new URL(imageUrl);
 			InputStream is = url.openStream();
 			byte[] buff = new byte[1024];
 			while(true) {
