@@ -85,4 +85,45 @@ public class Test7 {
 //            System.out.println(Fibonacci(i));
 //        }
     }
+
+
+    ////一只青蛙一次可以跳上1级台阶，也可以跳上2级。求该青蛙跳上一个n级的台阶总共有多少种跳法。
+    /**
+     * 递归套路，同上一题为斐波那契数列
+     *          | 1, (n=1)
+     f(n) =     | 2, (n=2)
+     *          | f(n-1)+f(n-2) ,(n>2,n为整数)
+     */
+    public int JumpFloor(int target) {
+        if(target==0){
+            return 0;
+        }
+        if(target==2){
+            return 2;
+        }
+        int a=1,b=2,c=1;
+        for(int i=3;i<=target;i++){
+            c=a+b;
+            a=b;
+            b=c;
+        }
+        return c;
+    }
+
+    ////一只青蛙一次可以跳上1级台阶，也可以跳上2级。求该青蛙跳上一个n级的台阶总共有多少种跳法。
+    /*
+              | 1       ,(n=0 )
+    f(n) =    | 1       ,(n=1 )
+              | 2*f(n-1),(n>=2)
+     */
+    //这里不会重复计算，递归影响不大,基本就是看栈的深度
+    public static int JumpFloorII(int target) {
+        if (target <= 0) {
+            return -1;
+        } else if (target == 1) {
+            return 1;
+        } else {
+            return 2 * JumpFloorII(target - 1);
+        }
+    }
 }
