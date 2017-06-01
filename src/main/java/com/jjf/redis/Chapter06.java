@@ -31,7 +31,7 @@ public class Chapter06 {
         conn.select(DATASOURCE_SELECT);
 
 //        testAddUpdateContact(conn);
-//        testAddressBookAutocomplete(conn);//自动补全
+        testAddressBookAutocomplete(conn);//自动补全
 //        testDistributedLocking(conn);//Redis实现锁
 //        testCountingSemaphore(conn); //计数信号量锁
 //        testDelayedTasks(conn);
@@ -381,7 +381,7 @@ public class Chapter06 {
 
     @SuppressWarnings("unchecked")
     public Set<String> autocompleteOnPrefix(Jedis conn, String guild, String prefix) {
-        String[] range = findPrefixRange(prefix);
+        String[] range  = findPrefixRange(prefix);
         String start = range[0];
         String end = range[1];
         String identifier = UUID.randomUUID().toString();

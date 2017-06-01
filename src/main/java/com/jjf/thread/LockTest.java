@@ -19,7 +19,7 @@ public class LockTest {
 class  Outputter1 {  
     private Lock lock = new  ReentrantLock();// 锁对象
     public  void output(String name) {
-        lock.lock();// 得到锁  
+        lock.lock();// 得到锁
         try {  
             for(int i = 0; i < name.length(); i++) {  
                 System.out.print(name.charAt(i));  
