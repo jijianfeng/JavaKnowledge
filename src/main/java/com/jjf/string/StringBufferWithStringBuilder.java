@@ -42,5 +42,23 @@ public class StringBufferWithStringBuilder {
         testStringBuffer();
         testStringBulider();
     }
+
+    @Test
+    public void testCar(){
+        int a=1,b=1,c=1,d=1,e=1,f=1,g=1,h=1,i=1,j=1,k=1;
+        if(a%b!=(c+d)
+                && ((e-f)==1)
+                ||(g>h)
+                ||(j>=k)
+                ||(a<b)
+                ||(b<=a)
+                ||((a^b)==1)
+                ||((a&b)==1)
+                ||(a*b==1)
+                ||(a/b==1)
+                ){
+            System.out.println(">>>");
+        }
+    }
     
 }
