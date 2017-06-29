@@ -35,5 +35,13 @@ public class BaseData {
 
         System.out.println(c1+"::"+c);
 
+        String a = null;
+
+        switch(a){
+            case "123":
+                System.out.println("123");
+            default:
+                System.out.println("default");
+        }
     }
 }
