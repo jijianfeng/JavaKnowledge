@@ -48,7 +48,7 @@ public class ForkJoin extends RecursiveTask<Integer> {
     }
 
     public static void main(String[] args) throws ExecutionException, InterruptedException {
-        long[] array = genArray(1000000);
+        long[] array = genArray(1000);
 
         // 1. 创建任务
         ForkJoin ForkJoin = new ForkJoin(array, 0, array.length - 1);
