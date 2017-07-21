@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="Maven: org.jboss.resteasy:resteasy-jaxrs:3.0.7.youzan-SNAPSHOT">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/jboss/resteasy/resteasy-jaxrs/3.0.7.youzan-SNAPSHOT/resteasy-jaxrs-3.0.7.youzan-20151225.082624-6.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$MAVEN_REPOSITORY$/org/jboss/resteasy/resteasy-jaxrs/3.0.7.youzan-SNAPSHOT/resteasy-jaxrs-3.0.7.youzan-20151225.082624-6-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/jboss/resteasy/resteasy-jaxrs/3.0.7.youzan-SNAPSHOT/resteasy-jaxrs-3.0.7.youzan-20151225.082624-6-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

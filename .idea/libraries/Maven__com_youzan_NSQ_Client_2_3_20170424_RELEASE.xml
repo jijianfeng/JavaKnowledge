@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="Maven: com.youzan:NSQ-Client:2.3.20170424-RELEASE">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/com/youzan/NSQ-Client/2.3.20170424-RELEASE/NSQ-Client-2.3.20170424-RELEASE.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$MAVEN_REPOSITORY$/com/youzan/NSQ-Client/2.3.20170424-RELEASE/NSQ-Client-2.3.20170424-RELEASE-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$MAVEN_REPOSITORY$/com/youzan/NSQ-Client/2.3.20170424-RELEASE/NSQ-Client-2.3.20170424-RELEASE-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

@@ -150,6 +150,29 @@
             <artifactId>joda-time</artifactId>
             <version>2.9.9</version>
         </dependency>
+        <dependency>
+            <groupId>com.youzan.pay.core</groupId>
+            <artifactId>mq-nsq</artifactId>
+            <version>1.0.5-20170710-RELEASE</version>
+        </dependency>
+        <dependency>
+            <groupId>com.youzan</groupId>
+            <artifactId>NSQ-Client</artifactId>
+            <version>2.3.20170424-RELEASE</version>
+        </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.16.6</version>
+        </dependency>
+        <dependency>
+            <groupId>com.youzan.pay.provision</groupId>
+            <artifactId>core-service</artifactId>
+            <version>1.0.2-20170703-RELEASE</version>
+        </dependency>
+
+
+
     </dependencies>
     
 </project>

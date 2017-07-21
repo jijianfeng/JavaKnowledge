@@ -21,12 +21,10 @@ public class ThreadPoolRejectTest {
         pool.setMaxPoolSize(5);
         pool.setQueueCapacity(10);
         pool.initialize();
-        long start = System.currentTimeMillis();
-        System.out.println(System.currentTimeMillis()-start);
     }
 
     /**
-     * 不处理TaskRejectedException，会丢失线程任务
+     * 不处理TaskRejectedException，发生时会丢失线程任务
      */
     @Test
     public void normal(){
@@ -53,10 +51,10 @@ public class ThreadPoolRejectTest {
     }
 
     /**
-     * 额外花费一个线程处理TaskRejectedException，任务不会丢失
+     * 额外花费一个线程处理TaskRejectedException，任务不会丢失,不阻塞线程
      */
     @Test
-    public void sacrificeOneThread(){
+    public void safeThreadPool(){
         for(int i=0;i<16;i++){  //分别设为3 5 14
             new Thread(() ->{
                 for(;;){//比while true 性能高
@@ -94,6 +92,6 @@ class LowThread implements Runnable{
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        System.out.println("end");
+        System.out.println(Thread.currentThread().getId()+":end");
     }
 }

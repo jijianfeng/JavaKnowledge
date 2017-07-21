@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="Maven: com.youzan.pay:biz.settlement.api:0.1.2.20170510-RELEASE">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/com/youzan/pay/biz.settlement.api/0.1.2.20170510-RELEASE/biz.settlement.api-0.1.2.20170510-RELEASE.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$MAVEN_REPOSITORY$/com/youzan/pay/biz.settlement.api/0.1.2.20170510-RELEASE/biz.settlement.api-0.1.2.20170510-RELEASE-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$MAVEN_REPOSITORY$/com/youzan/pay/biz.settlement.api/0.1.2.20170510-RELEASE/biz.settlement.api-0.1.2.20170510-RELEASE-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="Maven: com.youzan.pay.core:api-model:1.0.2-20170515-RELEASE">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/com/youzan/pay/core/api-model/1.0.2-20170515-RELEASE/api-model-1.0.2-20170515-RELEASE.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$MAVEN_REPOSITORY$/com/youzan/pay/core/api-model/1.0.2-20170515-RELEASE/api-model-1.0.2-20170515-RELEASE-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$MAVEN_REPOSITORY$/com/youzan/pay/core/api-model/1.0.2-20170515-RELEASE/api-model-1.0.2-20170515-RELEASE-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

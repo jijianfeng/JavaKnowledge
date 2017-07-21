@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="Maven: com.youzan.pay.acctrans:acctrans-api:1.0.4-20170524-RELEASE">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/com/youzan/pay/acctrans/acctrans-api/1.0.4-20170524-RELEASE/acctrans-api-1.0.4-20170524-RELEASE.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$MAVEN_REPOSITORY$/com/youzan/pay/acctrans/acctrans-api/1.0.4-20170524-RELEASE/acctrans-api-1.0.4-20170524-RELEASE-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$MAVEN_REPOSITORY$/com/youzan/pay/acctrans/acctrans-api/1.0.4-20170524-RELEASE/acctrans-api-1.0.4-20170524-RELEASE-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

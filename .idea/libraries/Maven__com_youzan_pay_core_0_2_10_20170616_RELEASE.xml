@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="Maven: com.youzan.pay:core:0.2.10-20170616-RELEASE">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/com/youzan/pay/core/0.2.10-20170616-RELEASE/core-0.2.10-20170616-RELEASE.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$MAVEN_REPOSITORY$/com/youzan/pay/core/0.2.10-20170616-RELEASE/core-0.2.10-20170616-RELEASE-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$MAVEN_REPOSITORY$/com/youzan/pay/core/0.2.10-20170616-RELEASE/core-0.2.10-20170616-RELEASE-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>
