@@ -7,6 +7,8 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import java.util.Random;
 import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.RejectedExecutionHandler;
+import java.util.concurrent.ThreadPoolExecutor;
 
 /**
  * Created by jijianfeng on 2017/6/22.
@@ -20,6 +22,11 @@ public class ThreadPoolRejectTest {
         pool.setCorePoolSize(3);
         pool.setMaxPoolSize(5);
         pool.setQueueCapacity(10);
+        //默认的直接跑出Reject异常
+//        pool.setRejectedExecutionHandler(new ThreadPoolExecutor.AbortPolicy());
+        //当线程池中的数量等于最大线程数时、重试执行当前的任务，交由调用者线程来执行任务,会阻塞主线程。
+        pool.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
+        //还有DiscardOldestPolicy() 抛弃最后一个任务和DiscardPolicy()不进行任何操作
         pool.initialize();
     }
 
@@ -48,36 +55,52 @@ public class ThreadPoolRejectTest {
                 e.printStackTrace();
             }
         }
+        System.out.println("i am ok");
     }
 
     /**
      * 额外花费一个线程处理TaskRejectedException，任务不会丢失,不阻塞线程
      */
     @Test
-    public void safeThreadPool(){
-        for(int i=0;i<16;i++){  //分别设为3 5 14
-            new Thread(() ->{
-                for(;;){//比while true 性能高
-                    try{
-                        pool.execute(new LowThread());
-                        break;
-                    }
-                    catch (TaskRejectedException exception){
-                        try {
-                            Thread.sleep(1000);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                    continue;
-                }
-            }).start();
-        }
+    public void safeUnBlockThreadPool(){
+        UnBlockExecute(()->{
+            for(int i=0;i<16;i++){  //分别设为3 5 14
+                pool.execute(new LowThread());
+            }
+        });
+        System.out.println("i am ok");
+    }
+
+    @Test
+    public void safeBlockThreadPool(){
+        BlockExecute(()->{
+            for(int i=0;i<16;i++){  //分别设为3 5 14
+                pool.execute(new LowThread());
+            }
+        });
+        System.out.println("i am ok");
     }
 
     @After
     public void show() throws InterruptedException {
         Thread.sleep(1000000000);
+    }
+
+    /**
+     * 阻塞的执行，适合任务多，执行速度快的情况
+     * tip:这里的阻塞是指从线程池中获取线程被阻塞，并非执行任务
+     */
+    private void BlockExecute(Runnable runnable){
+        pool.execute(runnable);
+    }
+
+    /**
+     * 非阻塞执行，适合任务时间长、但是量不多的情况。
+     * tip:这里的阻塞是指从线程池中获取线程被阻塞，并非执行任务
+     * @param runnable
+     */
+    private void UnBlockExecute(Runnable runnable){
+        new Thread(runnable).start();
     }
 }
 
