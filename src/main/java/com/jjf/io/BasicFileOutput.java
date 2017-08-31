@@ -7,7 +7,7 @@ import java.io.StringReader;
 /**
  * Created by jjf_lenovo on 2017/5/23.
  */
-//3、基本的文件输出。
+//字符流
 public class BasicFileOutput {
     static String file = "C:/M.txt";
 

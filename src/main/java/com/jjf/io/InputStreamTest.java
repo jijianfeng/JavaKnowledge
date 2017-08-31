@@ -29,10 +29,4 @@ public class InputStreamTest  {
         br.close();
         return sb.toString();
     }
-
-    @Test
-    public void test(){
-        List list = Arrays.asList("1", "2");
-        System.out.println(list.toString());
-    }
 }

@@ -13,7 +13,6 @@ import java.nio.channels.FileChannel;
  */
 public abstract class MapMemeryBufferTest {
     private static int numOfInts = 4000000;
-    private static int numOfUbuffInts = 200000;
 
     private String name;
 
