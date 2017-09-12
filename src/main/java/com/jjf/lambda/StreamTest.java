@@ -1,10 +1,14 @@
 package com.jjf.lambda;
 
+import com.jjf.collection.HashMap;
+
 import org.junit.Test;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.IntSummaryStatistics;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -105,5 +109,28 @@ public class StreamTest {
         System.out.println("Lowest prime number in List : " + stats.getMin());
         System.out.println("Sum of all prime numbers : " + stats.getSum());
         System.out.println("Average of all prime numbers : " + stats.getAverage());
+    }
+
+    /**
+     * parallelStream并行流多线程的隐患
+     */
+    @Test
+    public void testParallelStream(){
+        List list = new ArrayList();
+        for(int i=0;i<1000;i++){
+            list.add(i);
+        }
+
+        Map map = new HashMap<>();
+
+        long start = System.currentTimeMillis();
+        list.parallelStream()
+            .forEach(i->{
+                map.put("key"+i,"123");
+            });
+
+        System.out.println(map.size());
+
+        System.out.println(System.currentTimeMillis()-start);
     }
 }
