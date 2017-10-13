@@ -68,11 +68,18 @@ public class ArraysTest {
   @Test
   public void testAddAndRemove1(){
     List list = new Vector();
-    list.add(2);
-    list.add(3);
-    list.add(4);
-    list.add(5);
-    list.add(0,1);
+    for(int i=0;i<1000;i++){
+      list.add(i);
+    }
+    list.add(0,123);
+    try {
+      while(true){
+        list.remove(10);
+      }
+    }
+    catch (ArrayIndexOutOfBoundsException e){
+
+    }
     System.out.println(list.toString());
   }
 
