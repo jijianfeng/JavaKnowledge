@@ -1,4 +1,4 @@
-package com.jjf.Reference;
+package com.jjf.reference;
 
 import org.junit.Test;
 
