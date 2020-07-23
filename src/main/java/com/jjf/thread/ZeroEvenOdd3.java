@@ -1,7 +1,7 @@
 package com.jjf.thread;
 
 /**
- * 打印零与奇偶数(信号量解法)
+ * 打印零与奇偶数
  *
  * @author IronMan 2020/06/25
  */
@@ -42,25 +42,25 @@ import java.util.function.IntConsumer;
  * 链接：https://leetcode-cn.com/problems/print-zero-even-odd
  * 著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。
  */
-public class ZeroEvenOdd {
+public class ZeroEvenOdd3 {
     private int n;
-    private Semaphore zero = new Semaphore(1);
-    private Semaphore even = new Semaphore(0);
-    private Semaphore odd = new Semaphore(0);
+    private Semaphore z = new Semaphore(1);
+    private Semaphore e = new Semaphore(0);
+    private Semaphore o = new Semaphore(0);
 
-    public ZeroEvenOdd(int n) {
+    public ZeroEvenOdd3(int n) {
         this.n = n;
     }
 
     public void zero(IntConsumer printNumber) {
         try {
             for (int i = 0; i < n; i++) {
-                zero.acquire();
+                z.acquire();
                 printNumber.accept(0);
                 if (i % 2 == 0) {
-                    odd.release();
+                    o.release();
                 } else {
-                    even.release();
+                    e.release();
                 }
             }
         } catch (Exception e) {
@@ -72,9 +72,9 @@ public class ZeroEvenOdd {
     public void even(IntConsumer printNumber) {
         try {
             for (int i = 2; i <= n; i += 2) {
-                even.acquire();
+                e.acquire();
                 printNumber.accept(i);
-                zero.release();
+                z.release();
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -84,9 +84,9 @@ public class ZeroEvenOdd {
     public void odd(IntConsumer printNumber) {
         try {
             for (int i = 1; i <= n; i += 2) {
-                odd.acquire();
+                o.acquire();
                 printNumber.accept(i);
-                zero.release();
+                z.release();
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -94,7 +94,7 @@ public class ZeroEvenOdd {
     }
 
     public static void main(String[] args) {
-        ZeroEvenOdd zeroEvenOdd = new ZeroEvenOdd(10);
+        ZeroEvenOdd3 zeroEvenOdd = new ZeroEvenOdd3(10);
         new Run(zeroEvenOdd, (zeo) -> zeo.even(System.out::print)).start();
 
         new Run(zeroEvenOdd, (zeo) -> zeo.zero(System.out::print)).start();
@@ -104,10 +104,10 @@ public class ZeroEvenOdd {
 
     static class Run extends Thread {
 
-        private Consumer<ZeroEvenOdd> consumer;
-        private ZeroEvenOdd zeroEvenOdd;
+        private Consumer<ZeroEvenOdd3> consumer;
+        private ZeroEvenOdd3 zeroEvenOdd;
 
-        public Run(ZeroEvenOdd zeroEvenOdd, Consumer<ZeroEvenOdd> consumer) {
+        public Run(ZeroEvenOdd3 zeroEvenOdd, Consumer<ZeroEvenOdd3> consumer) {
             this.consumer = consumer;
             this.zeroEvenOdd = zeroEvenOdd;
         }
